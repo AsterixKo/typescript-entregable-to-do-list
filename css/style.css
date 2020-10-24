@@ -217,3 +217,7 @@ body {
 h1{
     font-size: xx-large;
 }
+
+.todo-content-buttons {
+    margin-left: auto;
+}
