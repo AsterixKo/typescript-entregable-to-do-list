@@ -9,3 +9,4 @@ function addContent(): void{
 function deleteNote(id:number): void{
     console.log('deleteNote...');
 }
+
