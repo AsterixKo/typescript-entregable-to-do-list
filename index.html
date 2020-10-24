@@ -4,14 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>To do list</title>
+    <link rel="icon" href="image/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="fa/css/all.css">
 </head>
 
 <body>
-    <h1>To do list</h1>
-    <i class="far fa-user"></i> <!-- uses regular style -->
+    <div class="main-content">
+        <div class="main-content-internal">
+            <div class="todo-header">
+                <div class="todo-title">
+                    <h1>To do list</h1>
+                </div>
+                <div class="todo-search">
+                    <input id="id-search" class="todo-input-search" type="text" onkeyup="search()"
+                        placeholder="Search to do...">
+                </div>
+            </div>
+
+            <div id="id-todo-content" class="todo-content">
+                <div class="todo-content-note">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla amet esse vitae numquam assumenda
+                    sequi modi. Quam suscipit voluptatum modi repudiandae sed consequatur. Provident harum omnis est,
+                    distinctio eveniet reprehenderit.
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla amet esse vitae numquam assumenda
+                    sequi modi. Quam suscipit voluptatum modi repudiandae sed consequatur. Provident harum omnis est,
+                    distinctio eveniet reprehenderit.
+                </div>
+                <div class="todo-content-buttons">
+                    <i class="far fa-trash-alt" onclick="deleteNote('0')"></i>
+                </div>
+            </div>
+
+            <div class="todo-add">
+                <div class="todo-add-title">
+                    <h2>Add new "to do":</h2>
+                </div>
+                <div class="todo-add-content">
+                    <textarea id="add-content" type="text" class="todo-add-input-content">Add contend here...</textarea>
+                </div>
+                <div class="todo-add-button-div">
+                    <button class="todo-add-button" onclick="addContent()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script src="js/index.js"></script>
 </body>
 
