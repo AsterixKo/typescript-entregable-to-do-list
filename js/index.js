@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 class Note {
     constructor(id, description) {
         this._id = id;
@@ -19,59 +28,75 @@ class Note {
 }
 let todoList = [];
 let listFound = [];
-function search() {
-    console.log('search...');
-    let inputValue = $('#id-search').val();
-    if (inputValue != null && inputValue.length > 0 && inputValue.trim() != '') {
-        console.log('search:', inputValue);
-        let inputValues = inputValue.toLowerCase().split(' ');
-        listFound = [];
-        for (const itemTodo of todoList) {
-            let added = false;
-            for (let i = 0; i < inputValues.length && !added; i++) {
-                if (itemTodo.description.toLowerCase().includes(inputValues[i])) {
-                    added = true;
-                    listFound.push(itemTodo);
-                }
-            }
-        }
-        showNotesSearch(listFound);
-    }
-    else {
+loadToDoListFromDB();
+function loadToDoListFromDB() {
+    fetchNotesJSON().then((res) => {
+        console.log('fetchNotesJSON');
+        console.log(res);
+        todoList = res;
         showNotes(todoList);
-    }
+    });
+}
+function search() {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('search...');
+        let inputValue = $('#id-search').val();
+        if (inputValue != null && inputValue.length > 0 && inputValue.trim() != '') {
+            console.log('search:', inputValue);
+            yield fetchNotesSearchJSON(inputValue).then((res) => {
+                listFound = res;
+            });
+            showNotesSearch(listFound);
+        }
+        else {
+            showNotes(todoList);
+        }
+    });
 }
 function addContent() {
-    console.log('addContent...');
-    let textAreaValue = $('#add-content').val();
-    if (textAreaValue != null && textAreaValue.length > 0 && textAreaValue.trim() != '') {
-        console.log('addContent has text');
-        let newNote = new Note(uuidv4(), textAreaValue);
-        todoList.push(newNote);
-        showNotes(todoList);
-        $('#add-content').val('');
-        $('#id-search').val('');
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('addContent...');
+        let textAreaValue = $('#add-content').val();
+        if (textAreaValue != null && textAreaValue.length > 0 && textAreaValue.trim() != '') {
+            console.log('addContent has text');
+            let newNote = new Note(uuidv4(), textAreaValue);
+            yield fetchNotesCreateNote(newNote);
+            yield loadToDoListFromDB();
+            showNotes(todoList);
+            $('#add-content').val('');
+            $('#id-search').val('');
+        }
+    });
 }
 function deleteNote(id) {
-    console.log('deleteNote...', id);
-    todoList = todoList.filter(function (obj) {
-        return obj.id !== id;
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('deleteNote...', id);
+        yield fetchNotesDeleteNote(id);
+        console.log('fetchNotesDeleteNote_end');
+        todoList = todoList.filter(function (obj) {
+            return obj.id != id;
+        });
+        listFound = listFound.filter(function (obj) {
+            return obj.id != id;
+        });
+        yield loadToDoListFromDB();
+        showNotes(todoList);
     });
-    listFound = listFound.filter(function (obj) {
-        return obj.id !== id;
-    });
-    showNotes(todoList);
 }
 function deleteNoteFromSearch(id) {
-    console.log('deleteNote...', id);
-    todoList = todoList.filter(function (obj) {
-        return obj.id !== id;
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('deleteNote...', id);
+        yield fetchNotesDeleteNote(id);
+        console.log('fetchNotesDeleteNote_end');
+        todoList = todoList.filter(function (obj) {
+            return obj.id != id;
+        });
+        listFound = listFound.filter(function (obj) {
+            return obj.id != id;
+        });
+        console.log('listFound', listFound);
+        showNotesSearch(listFound);
     });
-    listFound = listFound.filter(function (obj) {
-        return obj.id !== id;
-    });
-    showNotesSearch(listFound);
 }
 function showNotes(list) {
     $('#id-todo-content').empty();
@@ -99,5 +124,52 @@ function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
+    });
+}
+function fetchNotesJSON() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch(`http://localhost:3000/notes/`, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'default'
+        });
+        const notes = yield response.json();
+        return notes;
+    });
+}
+function fetchNotesSearchJSON(query) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch(`http://localhost:3000/notes/${query}`, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'default'
+        });
+        const notes = yield response.json();
+        return notes;
+    });
+}
+function fetchNotesCreateNote(note) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const rawResponse = yield fetch(`http://localhost:3000/notes/`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ description: note.description })
+        });
+        const content = yield rawResponse.json();
+        console.log(content);
+    });
+}
+function fetchNotesDeleteNote(id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const rawResponse = yield fetch(`http://localhost:3000/notes/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
     });
 }

@@ -36,63 +36,87 @@ let listFound: Note[] = [];
 // todoList.push(note2);
 // todoList.push(note3);
 
+loadToDoListFromDB();
 
-function search(): void {
+function loadToDoListFromDB() {
+    fetchNotesJSON().then((res: Note[]) => {
+        console.log('fetchNotesJSON');
+        console.log(res);
+        todoList = res;
+        //  console.log(todoList[0].description);
+        showNotes(todoList);
+    });
+}
+
+
+async function search() {
     console.log('search...');
     let inputValue = $('#id-search').val() as string;
     if (inputValue != null && inputValue.length > 0 && inputValue.trim() != '') {
         console.log('search:', inputValue);
-        let inputValues: string[] = inputValue.toLowerCase().split(' ');
-        listFound = [];
-        for (const itemTodo of todoList) {
-            let added = false;
-            for (let i = 0; i < inputValues.length && !added; i++) {
-                if (itemTodo.description.toLowerCase().includes(inputValues[i])) {
-                    added = true;
-                    listFound.push(itemTodo);
-                }
-            }
-        }
+        await fetchNotesSearchJSON(inputValue).then((res: Note[])=>{
+            listFound = res;
+        });
+        // let inputValues: string[] = inputValue.toLowerCase().split(' ');
+        // listFound = [];
+        // for (const itemTodo of todoList) {
+        //     let added = false;
+        //     for (let i = 0; i < inputValues.length && !added; i++) {
+        //         if (itemTodo.description.toLowerCase().includes(inputValues[i])) {
+        //             added = true;
+        //             listFound.push(itemTodo);
+        //         }
+        //     }
+        // }
         showNotesSearch(listFound);
-    }else{
+    } else {
         showNotes(todoList);
     }
 }
 
-function addContent(): void {
+async function addContent() {
     console.log('addContent...');
 
     let textAreaValue = $('#add-content').val() as string;
     if (textAreaValue != null && textAreaValue.length > 0 && textAreaValue.trim() != '') {
         console.log('addContent has text');
         let newNote: Note = new Note(uuidv4(), textAreaValue);
-        todoList.push(newNote);
+        // todoList.push(newNote);
+        await fetchNotesCreateNote(newNote);
+        await loadToDoListFromDB();
         showNotes(todoList);
         $('#add-content').val('');
         $('#id-search').val('');
     }
 }
 
-function deleteNote(id: string): void {
+async function deleteNote(id: string) {
     console.log('deleteNote...', id);
+    await fetchNotesDeleteNote(id);
+    console.log('fetchNotesDeleteNote_end');
     todoList = todoList.filter(function (obj) {
-        return obj.id !== id;
+        return obj.id != id;
     });
     listFound = listFound.filter(function (obj) {
-        return obj.id !== id;
+        return obj.id != id;
     });
     // todoList.splice(id, 1);
+    await loadToDoListFromDB();
     showNotes(todoList);
 }
 
-function deleteNoteFromSearch(id: string): void {
+async function deleteNoteFromSearch(id: string) {
     console.log('deleteNote...', id);
+    await fetchNotesDeleteNote(id);
+    console.log('fetchNotesDeleteNote_end');
     todoList = todoList.filter(function (obj) {
-        return obj.id !== id;
+        return obj.id != id;
     });
     listFound = listFound.filter(function (obj) {
-        return obj.id !== id;
+        return obj.id != id;
     });
+    console.log('listFound', listFound);
+    // await loadToDoListFromDB();
     showNotesSearch(listFound);
 }
 
@@ -160,3 +184,50 @@ function uuidv4() {
 }
 
 //   console.log(uuidv4());
+
+async function fetchNotesJSON() {
+    const response = await fetch(`http://localhost:3000/notes/`,
+        {
+            method: 'GET',
+            mode: 'cors', // <---
+            cache: 'default'
+        });
+    const notes = await response.json();
+    return notes;
+}
+
+async function fetchNotesSearchJSON(query: string) {
+    const response = await fetch(`http://localhost:3000/notes/${query}`,
+        {
+            method: 'GET',
+            mode: 'cors', // <---
+            cache: 'default'
+        });
+    const notes = await response.json();
+    return notes;
+}
+
+async function fetchNotesCreateNote(note: Note) {
+    const rawResponse = await fetch(`http://localhost:3000/notes/`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ description: note.description })
+    });
+    const content = await rawResponse.json();
+    console.log(content);
+}
+
+async function fetchNotesDeleteNote(id: string) {
+    const rawResponse = await fetch(`http://localhost:3000/notes/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    });
+    // const content = await rawResponse.json();
+    // console.log(content);
+}
