@@ -10,14 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 class Note {
     constructor(id, description) {
-        this._id = id;
+        this.__id = id;
         this._description = description;
     }
-    get id() {
+    get _id() {
         return this._id;
     }
-    set id(id) {
-        this._id = id;
+    set _id(id) {
+        this.__id = id;
     }
     get description() {
         return this._description;
@@ -74,10 +74,10 @@ function deleteNote(id) {
         yield fetchNotesDeleteNote(id);
         console.log('fetchNotesDeleteNote_end');
         todoList = todoList.filter(function (obj) {
-            return obj.id != id;
+            return obj._id != id;
         });
         listFound = listFound.filter(function (obj) {
-            return obj.id != id;
+            return obj._id != id;
         });
         yield loadToDoListFromDB();
         showNotes(todoList);
@@ -89,10 +89,10 @@ function deleteNoteFromSearch(id) {
         yield fetchNotesDeleteNote(id);
         console.log('fetchNotesDeleteNote_end');
         todoList = todoList.filter(function (obj) {
-            return obj.id != id;
+            return obj._id != id;
         });
         listFound = listFound.filter(function (obj) {
-            return obj.id != id;
+            return obj._id != id;
         });
         console.log('listFound', listFound);
         showNotesSearch(listFound);
@@ -102,9 +102,9 @@ function showNotes(list) {
     $('#id-todo-content').empty();
     let resultDiv = '';
     for (let i = 0; i < list.length; i++) {
-        resultDiv += `<div id="${list[i].id}" class="todo-content-box">`;
+        resultDiv += `<div id="${list[i]._id}" class="todo-content-box">`;
         resultDiv += `<div class="todo-content-note">${list[i].description}</div>`;
-        resultDiv += `<div class="todo-content-buttons"><i class="far fa-trash-alt" onclick="deleteNote('${list[i].id}')"></i></div>`;
+        resultDiv += `<div class="todo-content-buttons"><i class="far fa-trash-alt" onclick="deleteNote('${list[i]._id}')"></i></div>`;
         resultDiv += `</div>`;
     }
     $('#id-todo-content').append(resultDiv);
@@ -113,9 +113,9 @@ function showNotesSearch(list) {
     $('#id-todo-content').empty();
     let resultDiv = '';
     for (let i = 0; i < list.length; i++) {
-        resultDiv += `<div id="${list[i].id}" class="todo-content-box">`;
+        resultDiv += `<div id="${list[i]._id}" class="todo-content-box">`;
         resultDiv += `<div class="todo-content-note">${list[i].description}</div>`;
-        resultDiv += `<div class="todo-content-buttons"><i class="far fa-trash-alt" onclick="deleteNoteFromSearch('${list[i].id}')"></i></div>`;
+        resultDiv += `<div class="todo-content-buttons"><i class="far fa-trash-alt" onclick="deleteNoteFromSearch('${list[i]._id}')"></i></div>`;
         resultDiv += `</div>`;
     }
     $('#id-todo-content').append(resultDiv);
